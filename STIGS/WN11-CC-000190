@@ -1,0 +1,46 @@
+<#
+.SYNOPSIS
+    This PowerShell script disables autoplay for all drives on Windows 11.
+
+.NOTES
+    Author          : Michael Bowling Jr
+    LinkedIn        : linkedin.com/in/michael-bowling-jr-17mbj/
+    GitHub          : github.com/17mbj
+    Date Created    : 2026-09-26
+    Last Modified   : 2026-09-26
+    Version         : 1.0
+    CVEs            : N/A
+    Plugin IDs      : N/A
+    STIG-ID         : WN11-CC-000190
+    Documentation   : https://stigaview.com/products/win11/v2r7/WN11-CC-000190/
+
+.TESTED ON
+    Date(s) Tested  : 2026-09-26
+    Tested By       : Michael Bowling Jr
+    Systems Tested  : Microsoft Windows 11 (Azure VM)
+    PowerShell Ver. : 5.1
+
+.USAGE
+    Run as Administrator on a Windows 11 system:
+    PS C:\> .\WN11-CC-000190.ps1
+#>
+
+# STIG Remediation: Disable autoplay for all drives (CAT I - HIGH)
+# Registry Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\Explorer
+# Value Name: NoDriveTypeAutoRun | Value Type: REG_DWORD | Value: 255 (0xFF)
+
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\Explorer"
+
+if (-not (Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $regPath -Name "NoDriveTypeAutoRun" -Value 255 -Type DWord
+
+# Verify
+$currentValue = (Get-ItemProperty -Path $regPath -Name "NoDriveTypeAutoRun").NoDriveTypeAutoRun
+if ($currentValue -eq 255) {
+    Write-Host "[PASS] WN11-CC-000190: Autoplay is disabled for all drives (value: $currentValue)." -ForegroundColor Green
+} else {
+    Write-Host "[FAIL] WN11-CC-000190: Autoplay is NOT disabled for all drives (value: $currentValue, expected 255)." -ForegroundColor Red
+}
