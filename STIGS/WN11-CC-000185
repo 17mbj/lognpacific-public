@@ -1,0 +1,46 @@
+<#
+.SYNOPSIS
+    This PowerShell script configures the default autorun behavior to prevent autorun commands on Windows 11.
+
+.NOTES
+    Author          : Michael Bowling Jr
+    LinkedIn        : linkedin.com/in/michael-bowling-jr-17mbj/
+    GitHub          : github.com/17mbj
+    Date Created    : 2026-09-26
+    Last Modified   : 2026-09-26
+    Version         : 1.0
+    CVEs            : N/A
+    Plugin IDs      : N/A
+    STIG-ID         : WN11-CC-000185
+    Documentation   : https://stigaview.com/products/win11/v2r7/WN11-CC-000185/
+
+.TESTED ON
+    Date(s) Tested  : 2026-09-26
+    Tested By       : Michael Bowling Jr
+    Systems Tested  : Microsoft Windows 11 (Azure VM)
+    PowerShell Ver. : 5.1
+
+.USAGE
+    Run as Administrator on a Windows 11 system:
+    PS C:\> .\WN11-CC-000185.ps1
+#>
+
+# STIG Remediation: Prevent autorun commands from executing (CAT I - HIGH)
+# Registry Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+# Value Name: NoAutorun | Value Type: REG_DWORD | Value: 1
+
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+
+if (-not (Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $regPath -Name "NoAutorun" -Value 1 -Type DWord
+
+# Verify
+$currentValue = (Get-ItemProperty -Path $regPath -Name "NoAutorun").NoAutorun
+if ($currentValue -eq 1) {
+    Write-Host "[PASS] WN11-CC-000185: Default autorun behavior is set to prevent autorun commands." -ForegroundColor Green
+} else {
+    Write-Host "[FAIL] WN11-CC-000185: Default autorun behavior is NOT configured correctly." -ForegroundColor Red
+}
