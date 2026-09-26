@@ -1,0 +1,46 @@
+<#
+.SYNOPSIS
+    This PowerShell script disables autoplay for non-volume devices on Windows 11.
+
+.NOTES
+    Author          : Michael Bowling Jr
+    LinkedIn        : linkedin.com/in/michael-bowling-jr-17mbj/
+    GitHub          : github.com/17mbj
+    Date Created    : 2026-09-26
+    Last Modified   : 2026-09-26
+    Version         : 1.0
+    CVEs            : N/A
+    Plugin IDs      : N/A
+    STIG-ID         : WN11-CC-000180
+    Documentation   : https://stigaview.com/products/win11/v2r7/WN11-CC-000180/
+
+.TESTED ON
+    Date(s) Tested  : 2026-09-26
+    Tested By       : Michael Bowling Jr
+    Systems Tested  : Microsoft Windows 11 (Azure VM)
+    PowerShell Ver. : 5.1
+
+.USAGE
+    Run as Administrator on a Windows 11 system:
+    PS C:\> .\WN11-CC-000180.ps1
+#>
+
+# STIG Remediation: Disable autoplay for non-volume devices (CAT I - HIGH)
+# Registry Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer
+# Value Name: NoAutoplayfornonVolume | Value Type: REG_DWORD | Value: 1
+
+$regPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+
+if (-not (Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $regPath -Name "NoAutoplayfornonVolume" -Value 1 -Type DWord
+
+# Verify
+$currentValue = (Get-ItemProperty -Path $regPath -Name "NoAutoplayfornonVolume").NoAutoplayfornonVolume
+if ($currentValue -eq 1) {
+    Write-Host "[PASS] WN11-CC-000180: Autoplay for non-volume devices is disabled." -ForegroundColor Green
+} else {
+    Write-Host "[FAIL] WN11-CC-000180: Autoplay for non-volume devices is NOT disabled." -ForegroundColor Red
+}
